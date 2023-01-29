@@ -16,8 +16,233 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+				<section>
+					<h2>Type Symbol</h2>
+				</section>
+				<section>
+					<section>
+						<p>The symbol is a primitive.</p>
+						<p>Symbol instances are unique and immutable.</p>
+					</section>
+					<section>
+						<p>The purpose of a symbol is to be a guaranteed unique identifier for object properties without the risk of property collision.</p>
+					</section>
+				</section>
+				<section>
+					<h3>Let's learn how to create Symbols</h3>
+					<section>
+						<pre><code data-trim data-noescape>
+							let sym = Symbol();
+
+							console.log(typeof sym); // 'symbol'
+						</code></pre>
+					</section>
+					<section>
+						<pre><code data-trim data-noescape>
+							let genericSymbol = Symbol();
+							let otherGenericSymbol = Symbol();
+
+							let fooSymbol = Symbol('foo');
+							let otherFooSymbol = Symbol('foo');
+
+							console.log(genericSymbol == otherGenericSymbol); //false
+							console.log(fooSymbol == otherFooSymbol); //false
+						</code></pre>
+					</section>
+					<section>
+						<pre><code data-trim data-noescape>
+							let myBoolean = new Boolean();
+							console.log(typeof myBoolean); // 'object'
+
+							let myString = new String();
+							console.log(typeof myString); // 'object'
+
+							let myNumber = new Number();
+							console.log(typeof myNumber); // 'object'
+
+							let mySymbol = new Symbol(); // TypeError: Symbol is not a constructor
+						</code></pre>
+					</section>
+					<section>
+						<pre><code data-trim data-noescape>
+							let mySymbol = Symbol();
+							let myWrapperSymbol = Object(mySymbol);
+							console.log(typeof myWrapperSymbol); //'object'
+						</code></pre>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h3>Now let's move on to using symbols.</h3>
+					</section>
+					<section>
+						<pre><code data-trim data-noescape>
+							let s1 = Symbol('foo'),
+									s2 = Symbol('bar'),
+									s3 = Symbol('baz'),
+									s4 = Symbol('qux');
+
+							let o = {
+								[s1]: 'foo val'
+							};
+							//Also true: o[s1] = 'foo val';
+
+							console.log(o); // {Symbol{foo}: foo val}
+
+							Object.defineProperty(o, s2, {value: 'bar val'});
+							console.log(o); // {Symbol{foo}: foo val, Symbol{bar}: bar val}
+
+							Object.defineProperties(0, {
+								[s3]: {value: 'baz val'},
+								[s4]: {value: 'qux val'}
+							});
+
+							console.log(o);
+							// {Symbol{foo}: foo val, Symbol{bar}: bar val,
+							// Symbol{baz}: baz val, Symbol{qux}: qux val};
+						</code></pre>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h3>How to get the symbolic properties of an object</h3>
+					</section>
+					<section>
+						<pre><code data-trim data-noescape>
+							let s1 = Symbol('foo'),
+									s2 = Symbol('bar');
+
+							let o = {
+								[s1]: 'foo val',
+								[s2]: 'bar val',
+								baz: 'baz val',
+								qux: 'qux val'
+							};
+
+							console.log(Object.getOwnPropertySymbols(o));
+							// [Symbol(foo), Symbol(bar)]
+
+							console.log(Object.getOwnPropertyNames(o));
+							// ['baz', 'qux']
+
+							console.log(Object.getOwnPropertyDescriptors(o));
+							// {baz: {...}, quz: {...}, Symbol(foo): {...}, Symbol(bar): {...}}
+
+							console.log(Reflect.ownKeys(o));
+							// ['baz', 'qux', Symbol(foo), Symbol(bar)]
+						</code></pre>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h3>Why does a developer need a global symbol registry?</h3>
+					</section>
+					<section>
+						<pre><code data-trim data-noescape>
+							let fooGlobalSymbol = Symbol.for('foo');
+
+							console.log(typeof fooGlobalSymbol); // 'object'
+						</code></pre>
+					</section>
+					<section>
+						<pre><code data-trim data-noescape>
+							let fooGlobalSymbol = Symbol.for('foo'); // creating a new symbol
+							let otherFooGlobalSymbol = Symbol.for('foo'); // reusing an existing symbol
+
+							console.log(fooGlobalSymbol === otherFooGlobalSymbol); // true							
+						</code></pre>
+					</section>
+					<section>
+						<pre><code data-trim data-noescape>
+							let localSymbol = Symbol('foo');
+							let globalSymbol = Symbol.for('foo');
+
+							console.log(localSymbol === globalSymbol); // false							
+						</code></pre>
+					</section>
+					<section>
+						<pre><code data-trim data-noescape>
+							let emptyGlobalSymbol = Symbol.for();
+							console.log(emptyGlobalSymbol);	// Symbol(undefined)					
+						</code></pre>
+					</section>
+					<section>
+						<pre><code data-trim data-noescape>
+							// creating a global symbol
+							let s1 = Symbol.for('foo');
+							console.log(Symbol.keyFor(s1));	// foo	
+							
+							// create a regular symbol
+							let s2 = Symbol('bar');
+							console.log(Symbol.keyFor(s2)); // undefined
+						</code></pre>
+					</section>
+					<section>
+						<pre><code data-trim data-noescape>
+							Symbol.keyFor(123); // undefined
+						</code></pre>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h3>What about well-known or system symbols?</h3>
+					</section>
+					<section>
+						<p>Redefining symbols to change the behavior of native language constructs.</p>
+					</section>
+					<section>
+						<ul>
+							<li>Symbol.asyncIterator - for-await-of</li>
+							<li>Symbol.hasInstance - instanceof</li>
+							<li>Symbol.isConcatSpreadable - Array.prototype.concat()</li>
+							<li>Symbol.match - String.propotype.match()</li>
+							<li>Symbol.replace - String.prototype.replace()</li>
+							<li>Symbol.search - String.prototype.search()</li>
+							<li>Symbol.toPrimitive - ToPrimitive</li>
+							<li>Symbol.toStringTag - object.prototype.toString()</li>
+						</ul>
+					</section>
+					<section>
+						<section>
+							<h3>Symbol.iterator</h3>
+						</section>
+						<section>
+							<pre><code data-trim data-noescape>
+								class Emitter {
+									constructor(max) {
+										this.max = max;
+										this.idx = 0;
+									}
+
+									*[Symbol.iterator]() {
+										while(this.idx 	&lt; this.max) {
+											yield this.idx++;
+										}
+									}
+								}		
+								
+								function count() {
+									let emitter = new Emitter(5);
+
+									for (const x of emitter) {
+										console.log(x);
+									}
+								}
+
+								count();
+
+								//0
+								//1
+								//2
+								//3
+								//4
+							</code></pre>
+						</section>
+					</section>
+				</section>
+				<section>
+					Thank you for your attention.
+				</section>
 			</div>
 		</div>
 
